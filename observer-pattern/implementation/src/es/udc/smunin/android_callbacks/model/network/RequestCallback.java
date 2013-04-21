@@ -9,8 +9,11 @@ package es.udc.smunin.android_callbacks.model.network;
 public interface RequestCallback {
 	/**
 	 * Action to take if the request was correctly performed.
+	 * 
+	 * @param response
+	 *            server's response.
 	 */
-	public void onSuccess();
+	public void onSuccess(String response);
 
 	/**
 	 * Action to take if the request failed.

@@ -7,22 +7,17 @@ package es.udc.smunin.android_callbacks.model.value_objects;
  * 
  */
 public class Class {
-	private int id;
 	private String name;
 	private String teacher;
 	private int hours;
 
-	public Class(int id, String name, String teacher, int hours) {
+	public Class (String name, String teacher, int hours) {
 		super();
-		this.id = id;
 		this.name = name;
 		this.teacher = teacher;
 		this.hours = hours;
 	}
 
-	public int getId() {
-		return id;
-	}
 
 	public String getName() {
 		return name;
@@ -34,6 +29,11 @@ public class Class {
 
 	public int getHours() {
 		return hours;
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 
 }

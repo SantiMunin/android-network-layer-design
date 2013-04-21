@@ -3,8 +3,12 @@ package es.udc.smunin.android_callbacks.model.parsing;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.util.Log;
 import es.udc.smunin.android_callbacks.model.value_objects.Class;
-import es.udc.smunin.android_callbacks.model.value_objects.Student;
 
 /**
  * Provides methods to convert serialized data into java objects.
@@ -16,6 +20,7 @@ public class DataParser {
 
 	private static final String TAG = "DataParser";
 	private static DataParser instance = new DataParser();
+	private final static String OK = "OK";
 
 	private DataParser() {
 	}
@@ -24,33 +29,42 @@ public class DataParser {
 		return instance;
 	}
 
+	public boolean parseLogin(String JSONdata) {
+		JSONObject data;
+		String status;
+		try {
+			data = new JSONObject(JSONdata);
+			status = data.getString("status");
+		} catch (JSONException e) {
+			status = "";
+		}
+		return status.equals(OK);
+	}
+
 	/**
-	 * Parses a json string and returns a list of classes.
+	 * Parses a JSON string and returns a list of classes.
 	 * 
 	 * @param JSONdata
 	 *            Raw classes data.
 	 * @return List of classes. <code>null</code> if parsing fails.
 	 */
 	public List<Class> parseClasses(String JSONdata) {
-		// TODO actual implementation
 		List<Class> result = new LinkedList<Class>();
-		result.add(new Class(1, "Algorithms", "Spiderman", 100));
-		result.add(new Class(2, "Functional Programming", "Mr. T", 100));
-		return result;
-	}
+		JSONObject data;
+		try {
+			data = new JSONObject(JSONdata);
 
-	/**
-	 * Parses a json string and returns a list of students.
-	 * 
-	 * @param JSONdata
-	 *            Raw students data.
-	 * @return List of students. <code>null</code> if parsing fails.
-	 */
-	public List<Student> parseStudents(String JSONdata) {
-		List<Student> result = new LinkedList<Student>();
-		result.add(new Student("Brogrammer #1", 9));
-		result.add(new Student("Brogrammer #2", 7));
-		result.add(new Student("Turing prize", 10));
+			JSONArray classes = data.getJSONArray("classes");
+			for (int i = 0; i < classes.length(); i++) {
+				String name = ((JSONObject) classes.get(i)).getString("name");
+				String teacher = ((JSONObject) classes.get(i))
+						.getString("teacher");
+				int hours = ((JSONObject) classes.get(i)).getInt("hours");
+				result.add(new Class(name, teacher, hours));
+			}
+		} catch (JSONException e) {
+			Log.e(TAG, e.toString());
+		}
 		return result;
 	}
 }

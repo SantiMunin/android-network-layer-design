@@ -8,27 +8,49 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".TestActivity" >
 
-    <TextView
-        android:id="@+id/textView1"
+    <EditText
+        android:id="@+id/class_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_above="@+id/classes"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="26dp"
+        android:ems="10" />
 
     <Button
         android:id="@+id/classes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView1"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="105dp"
+        android:layout_marginBottom="19dp"
         android:text="Classes" />
 
-    <Button
-        android:id="@+id/students"
+    <EditText
+        android:id="@+id/user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/classes"
+        android:layout_alignLeft="@+id/class_text"
+        android:layout_alignParentTop="true"
+        android:ems="10" />
+
+    <Button
+        android:id="@+id/login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/password"
         android:layout_centerHorizontal="true"
-        android:text="Students" />
+        android:layout_marginTop="22dp"
+        android:text="Login" />
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/user"
+        android:layout_below="@+id/user"
+        android:layout_marginTop="22dp"
+        android:ems="10"
+        android:inputType="textPassword" />
 
 </RelativeLayout>
