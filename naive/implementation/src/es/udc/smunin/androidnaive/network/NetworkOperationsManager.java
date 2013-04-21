@@ -31,7 +31,7 @@ public class NetworkOperationsManager {
 	}
 
 	/**
-	 * Performs a http request.
+	 * Performs a HTTP request.
 	 * 
 	 * @param url
 	 *            Target.

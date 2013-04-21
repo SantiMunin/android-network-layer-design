@@ -9,7 +9,7 @@ import es.udc.smunin.android_naive.R;
 import es.udc.smunin.androidnaive.views.asyncworkers.AsyncHttpOperation;
 
 /**
- * This activity provides a button which will perform a http request.
+ * This activity provides a button which will perform a HTTP request.
  * 
  * 
  */
