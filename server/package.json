@@ -1,0 +1,11 @@
+{
+    "name" : "dummy-server",
+    "version" : "0.0.1",
+    "dependencies" : {
+        "express" : "*"
+    },
+    "engines" : {
+        "node" : "0.10.4",
+        "npm" : "1.2.18"
+    }
+}
