@@ -1,4 +1,4 @@
-Observer pattern in Android's network layer
+Observer pattern in Android: network layer
 ===========================================
 
-This project contains "naive" and well-designed implementation of the network layer in an Android project. In addition, it contains diagrams for both options.
+This project contains both "naive" and callback-based implementations of the network layer in an Android project. Each application has its own class diagram attached.
