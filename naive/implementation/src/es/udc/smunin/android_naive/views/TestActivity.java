@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import es.udc.smunin.android_naive.R;
-import es.udc.smunin.androidnaive.views.asyncworkers.AsyncHttpOperation;
+import es.udc.smunin.androidnaive.views.asyncworkers.AsyncGooglePageFetcher;
 
 /**
  * This activity provides a button which will perform a HTTP request.
@@ -25,7 +25,7 @@ public class TestActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						new AsyncHttpOperation(getApplicationContext())
+						new AsyncGooglePageFetcher(getApplicationContext())
 								.execute();
 					}
 				});
