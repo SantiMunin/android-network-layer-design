@@ -21,3 +21,6 @@ local.properties
 
 # OS X trash
 .DS_Store
+
+# MagicDraw thrash
+*.bak
