@@ -12,7 +12,7 @@ import es.udc.smunin.androidnaive.network.NetworkOperationsManager;
  * Performs a http request in background and then updates the UI.
  * 
  */
-public class AsyncHttpOperation extends AsyncTask<String, Void, String> {
+public class AsyncGooglePageFetcher extends AsyncTask<String, Void, String> {
 	private static final String TAG = "AsyncHttpOperation";
 	private boolean request_error = false;
 	private Context context;
@@ -23,7 +23,7 @@ public class AsyncHttpOperation extends AsyncTask<String, Void, String> {
 	 * @param context
 	 *            Application context.
 	 */
-	public AsyncHttpOperation(Context context) {
+	public AsyncGooglePageFetcher(Context context) {
 		this.context = context;
 	}
 
