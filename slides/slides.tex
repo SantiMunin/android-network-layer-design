@@ -2,45 +2,45 @@
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
 \usetheme{Warsaw}
-\title[Android network layer design]{Diseño de sistemas informáticos\\Capa de red en Android}
+\title[Network layer design in Android]{Android\\Network layer design}
 \author{Santiago Munín}
 \institute{Universidade da Coruña}
-\date{Mayo, 2013}
+\date{May, 2013}
 \begin{document}
 
 \begin{frame}
 \titlepage
 \end{frame}
 
-\section{Introducción}
-\begin{frame}{Motivación}
+\section{Introduction}
+\begin{frame}{Motivation}
 \begin{itemize}
-\item Gran parte de las aplicaciones móviles de éxito emplean una aquitectura Cliente/Servidor.
-\item Estas arquitecturas utilizan la red como medio para comunicarse.
-\item {\bf Ejemplos}: Twitter, Facebook, 4square, Evernote...
+\item A huge number of successful mobile applications use an Client/Server architecture.
+\item These architectures use the network as a tool to communicate. %TODO CHECK
+\item {\bf Examples}: Twitter, Facebook, 4square, Evernote...
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Arquitectura Cliente/Servidor}
+\begin{frame}{Client/Server architecture}
 \begin{itemize}
-\item La comunicación suele realizarse mediante HTTP (o HTTPS) contra servidores (habitualmente REST).
-\item Se emplean tecnologías como JSON o XML para transmitir información.
-\item Esta comunicación es potencialmente costosa $\rightarrow$ Si se realiza en el thread de la interfaz (thread principal) puede bloquear demasiado tiempo el teléfono y afectar a la experiencia del usuario.
-\item La solución a este problema es sencilla: ejecutar en segundo plano la petición y actualizar la interfaz una vez recibiba la respuesta (mientras tanto, permitir al usuario interactuar con la aplicación o mostrar un diálogo de carga).
+\item Communications are usually performed through HTTP (or HTTPS) with servers (usually REST servers).
+\item Markup languages (such as JSON or XML) are used in order to exchange information between nodes.
+\item These are costly communications$\rightarrow$ They have to be done through another thread or they would block the UI (decreasing the user experience).
+\item Simple solution: the network operation should be excuted in background and use the UI thread only after getting the response without blocking it (a loading dialog could be showed meanwhile).
 \end{itemize}
 \end{frame}
 
 \begin{frame}{AsyncTask}
 \begin{itemize}
-\item Android nos ofrece una clase que encapsula el manejo de threads.
-\item AsyncTask nos permite ejecutar una tarea en segundo plano y usar el resultado de la misma en primer plano (una vez haya acabado) sin bloquear la interfaz.
-\item {\bf Más información}: \url{http://developer.android.com/reference/android/os/AsyncTask.html}
+\item Android provides us with a class which wraps the thread handling.
+\item AsyncTask allows us to execute a task in background and use the result in foreground without blocking the UI.
+\item {\bf More information}: \url{http://developer.android.com/reference/android/os/AsyncTask.html}
 \end{itemize}
 \end{frame}
 
-\section{Primer diseño: solución ``directa''}
-\subsection{Diagrama de clases}
-\begin{frame}{Diagrama de clases}
+\section{First design: naive approach}
+\subsection{Class diagram}
+\begin{frame}{Class diagram}
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.6]{../naive/design_models/class_diagram}
@@ -48,15 +48,15 @@
 \end{figure}
 \end{frame}
 
-\begin{frame}{Explicación}
+\begin{frame}{Explanation}
 \begin{itemize}
-\item El cliente (habitualmente ``Activities'' Android) utiliza clases que heredan de ``AsyncTask'' para no bloquear la interfaz.
-\item La clase ``NetworkOperationsManager'' contiene la lógica relacionada con las llamadas en red (direcciones, parámetros...). Podría ser responsable del cacheo de respuestas.
+\item The client (usually ``Activities'' Android) uses classes which inherit from ``AsyncTask'' in order to not block the UI.
+\item The ``NetworkOperationsManager'' class contains all the logic relative to the network calls (url, parameters). It may be responsible of the response parsing and caching.
 \end{itemize}
 \end{frame}
 
-\subsection{Diagrama de secuencia}
-\begin{frame}{Diagrama de secuencia}
+\subsection{Sequence diagram}
+\begin{frame}{Sequence diagram}
 \begin{figure}
 \begin{center}
 \includegraphics[scale=0.4]{../naive/design_models/get_google_data_sequence}
@@ -64,34 +64,34 @@
 \end{figure}
 \end{frame}
 
-\begin{frame}{Explicación}
+\begin{frame}{Explanation}
 \begin{enumerate}
-\item {\bf En el thread principal}: Cuando se llama a ``execute'' sobre la ``AsyncTask'' se devuelve el control inmediatamente.
-\item {\bf Thread secundario}: Mientras tanto, se realiza la petición al servidor y se analiza la respuesta. 
-\item {\bf Thread principal}: Una vez acabado el trabajo en segundo plano, se vuelve a bloquear el thread principal y se realizan las acciones que se hayan indicado (por ejemplo, mostrar un diálogo con el resultado de la respuesta).
+\item {\bf Main thread}: Once ``execute'' is called it returns the control inmediately.
+\item {\bf Secondary thread}: Meanwhile, this thread does the http request and analizes the response.
+\item {\bf Main thread}: Once the background job is finished, the main thread is blocked again and the UI actions are performed (for example, show a dialog or update a textview).
 \end{enumerate}
 \begin{itemize}
-\item {\bf Nota}: Mientras el thread secundario realiza la petición, el thread principal puede estar haciendo cualquier cosa (muchas veces se muestra un diálogo de carga, pero no siempre).
+\item {\bf Note}: While the secondary thread performs the request, the main thread is able to execute any instructions (is usual to show a loading dialog).
 \end{itemize}
 \end{frame}
 
-\subsection{Conclusiones}
-\begin{frame}{Conclusiones}
+\subsection{Conclusions}
+\begin{frame}{Conclusions}
 \begin{itemize}
-\item Cada vez que se necesita hacer una petición (nueva o ya definida desde otra activity) y actualizar la interfaz, se define una clase que hereda de AsyncTask.
-\item Es necesario definir la petición a realizar (clase ``NetworkOperationsManager''), el procesamiento de la respuesta y la actualización de la interfaz. Demasiadas responsabilidades.
-\item Hay demasiado acoplamiento (se viola el SRP) $\rightarrow$ resulta dificultoso dividir la programación de la aplicación entre interfaz y bajo nivel (operaciones de red y cachés).
+\item Whenever you need to make a request (a new or an already defined one but from another activity) and update the UI, you have to define a class that inherits from AsyncTask.
+\item It's necessary to define the request to be performed (``NetworkOperationsManager'' class), the processing of the response and the UI update. Too many responsibilities.
+\item There is too much coupling (it violates the SRP) $\rightarrow$ It is difficult to distribute the programming between UI and low-level (network operations and caches).
 \end{itemize}
 \end{frame}
 
-\section{Segundo diseño: utilización de callbacks}
+\section{Second disgn: Callback-based}
 \subsection{Callbacks}
-\begin{frame}{¿Qué es un callback?}
+\begin{frame}{What is a callback?}
 \begin{itemize}
-\item Un callback es código ejecutable que se pasa como un argumento a otro código y se espera que sea llamado en un determinado momento.
-\item Los callbacks pueden ser síncronos o asíncronos según se ejecuten de forma inmediata o no.
-\item Los callbacks asíncronos exigen la existencia de más de un thread.
-\item Pueden considerarse una forma de patrón Observador donde se le dice a una función que, cuando realize su tarea, ejecute la reacción de la entidad que la llama.
+\item A callback is executable code that is passed as an argument to another code and is expected to be called at a given time.
+\item There are two types of callbacks: blocking callbacks (also known as synchronous callbacks or just callbacks) and deferred callbacks (also known as asynchronous callbacks).
+\item Deferred callbacks imply the existence of multiple threads.
+\item They are a sort of ``Observer'' pattern.
 \end{itemize}
 \end{frame}
 
@@ -109,7 +109,7 @@ fs.readFile('path', 'utf8', function(err,data) {
 
 \end{frame}
 
-\subsection{Diagrama de clases}
+\subsection{Class diagram}
 \begin{frame}
 \begin{figure}
 \begin{center}
@@ -118,22 +118,22 @@ fs.readFile('path', 'utf8', function(err,data) {
 \end{figure}
 \end{frame}
 
-\begin{frame}{Explicación (capa interna del modelo)}
+\begin{frame}{Explanation (model inner layer)}
 \begin{itemize}
-\item {\bf Network}: Este es el paquete más interno, define la acción básica de realizar una consulta HTTP y hacer ``algo'' con la respuesta. Ese ``algo'' se define mediante el ``RequestCallback''.
-\item {\bf Parsing}: Funcionalidad relativa al ``parseo'' de las respuestas. 
+\item {\bf Network}: This is the innermost package. It defines the basic action of making an HTTP request and ``doing something'' with the response. That ``something'' is defined by the ``requestCallback''.
+\item {\bf Parsing}: Response parsing methods.
 \end{itemize} 
 \end{frame}
 
-\begin{frame}{Explicación (fachada del modelo)}
+\begin{frame}{Explanation (model facade)}
 \begin{itemize}
-\item {\bf OperationsManager}: Punto de entrada al subsistema, ofrece operaciones de red y requiere callbacks para saber qué hacer con las respuestas.
-\item {\bf Callbacks}: Distintos tipos de callbacks que puedan requerir las operaciones del ``OperationsManager''.
-\item {\bf Value\_objects}: Aquí van las clases que representan objetos (sin funcionalidad, equivalentes a las ``structs'' de C).
+\item {\bf OperationsManager}: Entry point into the subsystem, provides network operations and requires callbacks for what to do with the answers.
+\item {\bf Callbacks}: Different types of callbacks that may be required by the Operations Manager.
+\item {\bf Value\_objects}: Classes that represent objects (equivalents to the ``C'' structs).
 \end{itemize} 
 \end{frame}
 
-\subsection{Diagrama de secuencia}
+\subsection{Sequence diagram}
 \begin{frame}
 \begin{figure}
 \begin{center}
@@ -142,46 +142,41 @@ fs.readFile('path', 'utf8', function(err,data) {
 \end{figure}
 \end{frame}
 
-\begin{frame}{Explicación}
+\begin{frame}{Explanation}
 \begin{enumerate}
-\item Se crea un LoginCallback (esta clase implementa la interfaz OperationCallback<Boolean>)
-\item Se llama a OperationsManager.getInstance().login(user, password, LoginCallback)
-\item OperationsManager crea un RequestCallback y se lo manda al HttpRequester junto con la dirección y parámetros de la petición.
-\item Aquí empieza la operación en segundo plano, mientras se devuelve el control de la interfaz.
-\item Cuando la operación termina se ejecuta el código de RequestCallback, que a su vez llama a LoginCallback y realiza las operaciones pertinentes.
+\item It creates a LoginCallback (this class implements OperationCallback<Boolean>).
+\item OperationsManager.getInstance().login(user, password, LoginCallback) is called.
+\item Operations Manager creates a requestCallback and sends it to HttpRequester along with the address and request parameters.
+\item Here begins the operation in the background. The UI thread is released.
+\item When the operation is finished, it executes the requestCallback code.
 \end{enumerate} 
 \end{frame}
-\subsection{Conclusiones}
-\begin{frame}[fragile]{Conclusiones}
+\subsection{Conclusions}
+\begin{frame}[fragile]{Conclusions}
 \begin{itemize}
-\item Esta aproximación se basa en tres conceptos: arquitectura MVC, patrón Observador (callbacks) y patrón Fachada.
-\item {\bf Ventajas}:
+\item This approach is based on three concepts: MVC architecture, Observer pattern (callbacks) and Facade pattern.
+\item {\bf Advantages}:
 \begin{itemize}
 
-\item Las responsabilidades están claramente separadas.
-\item El cliente del módulo de red solo necesita conocer la fachada.
-\item Esta aproximación permite dividir la programación de interfaz y red completamente. Conectarlas es inmediato.
+\item All the responsibilities are clearly separated.
+\item The client only needs to know the facade of the network module.
+\item his approach allows to divide the network and UI programming completely. Connecting them is straightforward.
 \end{itemize}
 
-\item {\bf Limitaciones}: 
+\item {\bf Hándicaps}: 
 \begin{itemize}
-\item Hay cierta repetición de código al no poder generalizar métodos como ``onFailure()''. \item La alternativa es utilizar una clase abstracta (pero no podriamos benificiarnos de implementar la interfaz directamente en una ``Activity'' si fuese lo suficientemente sencilla).
+\item There is some repetition of code which cannot be generalized in the ``onFailure'' methods.
+\item The alternative is to use an abstract class (but we could not implement the interface  directly into a `` Activity'' if it were simple enough).
 \end{itemize}
 \end{itemize}
 \end{frame}
-\section{Extras}
-\begin{frame}{Comentarios}
-\begin{itemize}
-\item El módulo más interno es común a un sinfín de aplicaciones Android $\rightarrow$ Convertirlo en una librería.
-\item Alguien ha tenido la idea antes y ha hecho un muy buen trabajo: {\url http://loopj.com/android-async-http/}
-\item Este mismo diseño puede ser aplicado a cualquier otra aplicación Java (u otra plataforma) siempre y cuando se implemente un mecanismo similar al AsyncTask (muchas plataformas no requieren actualizar la interfaz desde el thread principal).
-\end{itemize}
-\end{frame}
 
-\begin{frame}{Repositorio}
+\section{Extra notes}
+\begin{frame}{Extra}
 \begin{itemize}
-\item Diseño e implementación publicados en GitHub.
-\item {\url https://github.com/SantiMunin/android-observer-pattern-example}
+\item The innermost module is common to many Android apps $ \ rightarrow $ Turn it into a library.
+\item Someone had the idea before and has done a very good job: {\url http://loopj.com/android-async-http/}
+\item This same design can be applied to any other Java application (or other platform) as long as it implements a mechanism similar to AsyncTask (many platforms do not need to update the interface from the main thread).
 \end{itemize}
 \end{frame}
 \end{document}
