@@ -137,14 +137,14 @@ fs.readFile('path', 'utf8', function(err,data) {
 \begin{frame}
 \begin{figure}
 \begin{center}
-\includegraphics[scale=0.30]{../observer-pattern/diagrams/login}
+\includegraphics[scale=0.31]{../observer-pattern/diagrams/login}
 \end{center}
 \end{figure}
 \end{frame}
 
 \begin{frame}{Explanation}
 \begin{enumerate}
-\item It creates a LoginCallback (this class implements OperationCallback<Boolean>).
+\item It creates a LoginCallback (this class implements OperationCallback with the type Boolean as a parameter).
 \item OperationsManager.getInstance().login(user, password, LoginCallback) is called.
 \item Operations Manager creates a requestCallback and sends it to HttpRequester along with the address and request parameters.
 \item Here begins the operation in the background. The UI thread is released.
